@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XAU/USD Calculator — Minimalist</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --bg-color: #f5efe6;
+      --text-color: #000000;
+      --border-color: #000000;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+      color: var(--text-color);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      border: 2px solid var(--border-color);
+      background-color: var(--bg-color);
+      box-shadow: 8px 8px 0px var(--border-color);
+      padding: 40px;
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-title h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+    }
+
+    .header-title p {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+      opacity: 0.7;
+    }
+
+    .badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      border: 1px solid var(--border-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    @media (max-width: 840px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+      .container {
+        padding: 24px;
+        box-shadow: 4px 4px 0px var(--border-color);
+      }
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .mode-indicator {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      opacity: 0.6;
+    }
+
+    .mode-indicator.active {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    input[type="number"], select {
+      width: 100%;
+      padding: 12px 14px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 0;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--text-color);
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    input[type="number"]:focus, select:focus {
+      background-color: #ffffff;
+      box-shadow: 3px 3px 0px var(--border-color);
+    }
+
+    .direction-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .direction-btn {
+      position: relative;
+    }
+
+    .direction-btn input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .direction-btn label {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-bottom: 0;
+    }
+
+    .direction-btn input:checked + label {
+      background-color: var(--text-color);
+      color: var(--bg-color);
+    }
+
+    .results-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.25);
+    }
+
+    .result-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+
+    .result-value {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .result-row.highlight-row {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 4px;
+    }
+
+    .result-row.highlight-row .result-label {
+      font-weight: 700;
+      opacity: 1;
+    }
+
+    .result-row.highlight-row .result-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .warning-card {
+      margin-top: 24px;
+      padding: 16px;
+      border: 2px solid var(--border-color);
+      background-color: var(--text-color);
+      color: var(--bg-color);
+      display: none;
+    }
+
+    .warning-card p, .warning-card strong {
+      color: var(--bg-color);
+      font-size: 0.8rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .warning-card.active {
+      display: block;
+    }
+
+    footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="header-title">
+        <h1>XAU / USD</h1>
+        <p>Position Size & Risk Calculator</p>
+      </div>
+      <div class="badge">1 LOT = 100 OZ</div>
+    </header>
+
+    <div class="layout-grid">
+      <!-- PANEL INPUT -->
+      <div class="input-panel">
+        <div class="section-label">01. Parameters</div>
+
+        <div class="form-group">
+          <label for="balance">Account Balance ($)</label>
+          <input type="number" id="balance" value="1000" step="10">
+        </div>
+
+        <div class="form-group">
+          <label>Order Direction</label>
+          <div class="direction-toggle">
+            <div class="direction-btn">
+              <input type="radio" name="direction" id="buy" value="BUY" checked>
+              <label for="buy">BUY</label>
+            </div>
+            <div class="direction-btn">
+              <input type="radio" name="direction" id="sell" value="SELL">
+              <label for="sell">SELL</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="entry">Entry Price ($)</label>
+          <input type="number" id="entry" value="2600.00" step="0.10">
+        </div>
+
+        <div class="form-group">
+          <label for="sl">Stop Loss Price ($)</label>
+          <input type="number" id="sl" value="2590.00" step="0.10">
+        </div>
+
+        <div class="form-group">
+          <label for="tp">Take Profit Price ($)</label>
+          <input type="number" id="tp" value="2620.00" step="0.10">
+        </div>
+
+        <div class="form-group">
+          <label for="leverage">Leverage</label>
+          <select id="leverage">
+            <option value="100">1:100</option>
+            <option value="200">1:200</option>
+            <option value="500" selected>1:500</option>
+            <option value="1000">1:1000</option>
+            <option value="2000">1:2000</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="riskPercent">
+            Risk Ratio (%)
+            <span class="mode-indicator" id="riskModeLabel">[ACTIVE]</span>
+          </label>
+          <input type="number" id="riskPercent" value="2" step="0.1">
+        </div>
+
+        <div class="form-group">
+          <label for="lotSize">
+            Lot Size (Standard)
+            <span class="mode-indicator" id="lotModeLabel"></span>
+          </label>
+          <input type="number" id="lotSize" value="0.02" step="0.01">
+        </div>
+      </div>
+
+      <!-- PANEL HASIL -->
+      <div class="results-panel">
+        <div>
+          <div class="section-label">02. Output Analysis</div>
+
+          <div class="results-list">
+            <div class="result-row highlight-row">
+              <span class="result-label">Position Lot Size</span>
+              <span class="result-value" id="resLot">0.02 Lot</span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label">Pip Value</span>
+              <span class="result-value" id="resPipValue">$0.20</span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label">Required Margin</span>
+              <span class="result-value" id="resMargin">$10.40</span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label">Stop Loss Distance</span>
+              <span class="result-value" id="resSLPips">100 pips ($10.00)</span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label">Take Profit Distance</span>
+              <span class="result-value" id="resTPPips">200 pips ($20.00)</span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label">Risk Amount</span>
+              <span class="result-value" id="resPotentialLoss">-$20.00</span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label">Reward Amount</span>
+              <span class="result-value" id="resPotentialProfit">+$40.00</span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label">Risk : Reward Ratio</span>
+              <span class="result-value" id="resRRR">1 : 2.00</span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label">Margin Level</span>
+              <span class="result-value" id="resMarginLevel">9615.38%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="warning-card" id="warningBox">
+          <strong>[ ! ] Margin Call Risk</strong>
+          <p style="margin-top: 4px;">Required margin exceeds available account balance.</p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <span>Interconnected Engine</span>
+      <span>XAU/USD Spot Gold</span>
+    </footer>
+  </div>
+
+  <script>
+    let activeCalculationMode = 'RISK_FIRST';
+
+    const balanceInput = document.getElementById('balance');
+    const entryInput = document.getElementById('entry');
+    const slInput = document.getElementById('sl');
+    const tpInput = document.getElementById('tp');
+    const leverageInput = document.getElementById('leverage');
+    const riskPercentInput = document.getElementById('riskPercent');
+    const lotSizeInput = document.getElementById('lotSize');
+    const directionInputs = document.querySelectorAll('input[name="direction"]');
+
+    const riskModeLabel = document.getElementById('riskModeLabel');
+    const lotModeLabel = document.getElementById('lotModeLabel');
+
+    const resLot = document.getElementById('resLot');
+    const resPipValue = document.getElementById('resPipValue');
+    const resMargin = document.getElementById('resMargin');
+    const resSLPips = document.getElementById('resSLPips');
+    const resTPPips = document.getElementById('resTPPips');
+    const resPotentialLoss = document.getElementById('resPotentialLoss');
+    const resPotentialProfit = document.getElementById('resPotentialProfit');
+    const resRRR = document.getElementById('resRRR');
+    const resMarginLevel = document.getElementById('resMarginLevel');
+    const warningBox = document.getElementById('warningBox');
+
+    const CONTRACT_SIZE = 100;
+
+    function calculate() {
+      const balance = parseFloat(balanceInput.value) || 0;
+      const entry = parseFloat(entryInput.value) || 0;
+      const sl = parseFloat(slInput.value) || 0;
+      const tp = parseFloat(tpInput.value) || 0;
+      const leverage = parseFloat(leverageInput.value) || 1;
+      let riskPercent = parseFloat(riskPercentInput.value) || 0;
+      let lotSize = parseFloat(lotSizeInput.value) || 0;
+
+      const slDistance = Math.abs(entry - sl);
+      const tpDistance = Math.abs(entry - tp);
+
+      const slPips = slDistance * 10;
+      const tpPips = tpDistance * 10;
+
+      if (activeCalculationMode === 'RISK_FIRST') {
+        riskModeLabel.textContent = '[ACTIVE]';
+        riskModeLabel.classList.add('active');
+        lotModeLabel.textContent = '';
+        lotModeLabel.classList.remove('active');
+        
+        const riskAmount = balance * (riskPercent / 100);
+        if (slDistance > 0) {
+          lotSize = riskAmount / (slDistance * CONTRACT_SIZE);
+          lotSize = Math.max(0.01, parseFloat(lotSize.toFixed(2)));
+          lotSizeInput.value = lotSize;
+        }
+      } else if (activeCalculationMode === 'LOT_FIRST') {
+        lotModeLabel.textContent = '[ACTIVE]';
+        lotModeLabel.classList.add('active');
+        riskModeLabel.textContent = '';
+        riskModeLabel.classList.remove('active');
+
+        const riskAmount = slDistance * lotSize * CONTRACT_SIZE;
+        if (balance > 0) {
+          riskPercent = (riskAmount / balance) * 100;
+          riskPercentInput.value = riskPercent.toFixed(2);
+        }
+      }
+
+      const pipValue = lotSize * CONTRACT_SIZE * 0.10;
+      const requiredMargin = (lotSize * CONTRACT_SIZE * entry) / leverage;
+      const potentialLoss = slDistance * lotSize * CONTRACT_SIZE;
+      const potentialProfit = tpDistance * lotSize * CONTRACT_SIZE;
+      const rrr = potentialLoss > 0 ? (potentialProfit / potentialLoss) : 0;
+      const marginLevel = requiredMargin > 0 ? (balance / requiredMargin) * 100 : 0;
+
+      resLot.textContent = `${lotSize.toFixed(2)} Lot`;
+      resPipValue.textContent = `$${pipValue.toFixed(2)}`;
+      resMargin.textContent = `$${requiredMargin.toFixed(2)}`;
+      resSLPips.textContent = `${slPips.toFixed(0)} pips ($${slDistance.toFixed(2)})`;
+      resTPPips.textContent = `${tpPips.toFixed(0)} pips ($${tpDistance.toFixed(2)})`;
+      resPotentialLoss.textContent = `-$${potentialLoss.toFixed(2)}`;
+      resPotentialProfit.textContent = `+$${potentialProfit.toFixed(2)}`;
+      resRRR.textContent = `1 : ${rrr.toFixed(2)}`;
+      resMarginLevel.textContent = marginLevel > 0 ? `${marginLevel.toFixed(2)}%` : 'N/A';
+
+      if (requiredMargin > balance) {
+        warningBox.classList.add('active');
+      } else {
+        warningBox.classList.remove('active');
+      }
+    }
+
+    riskPercentInput.addEventListener('input', () => {
+      activeCalculationMode = 'RISK_FIRST';
+      calculate();
+    });
+
+    lotSizeInput.addEventListener('input', () => {
+      activeCalculationMode = 'LOT_FIRST';
+      calculate();
+    });
+
+    [balanceInput, entryInput, slInput, tpInput, leverageInput].forEach(input => {
+      input.addEventListener('input', calculate);
+    });
+
+    directionInputs.forEach(radio => {
+      radio.addEventListener('change', calculate);
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
